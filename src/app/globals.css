@@ -1,14 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #181616;
+  --foreground: #dbd2d2;
+  /* Use a variável da Font API do Next.js */
+  --primary-font: var(--font-audiowide), sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--primary-font);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -19,8 +21,34 @@
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Remova ou comente os @font-face, pois agora estamos usando a API de fontes do Next.js */
+/* 
+@layer base {
+  @font-face {
+    font-family: "general";
+    src: url("/app/fonts/general.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-family: "Zentry";
+    src: url("/app/fonts/zentry-regular.woff2") format("woff2");
+  }
+}
+*/
+
+/* Header */
+@layer utilities {
+  .nav-hover-btn {
+    @apply relative mx-4 text-lg uppercase text-blue-50 cursor-pointer;
+  }
+  .nav-hover-btn::after {
+    @apply absolute -bottom-0.5 left-0 h-0.5 w-full bg-white origin-bottom-right scale-x-0 transition-transform duration-300 ease-[cubic-bezier(0.65,0.05,0.36,1)];
+  }
+  .nav-hover-btn:hover::after {
+    @apply origin-bottom-left scale-x-100 bg-purple-200;
+  }
+
+  .floating-nav {
+    @apply bg-black rounded-lg border border-white/10;
+  }
 }
