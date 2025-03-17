@@ -139,8 +139,25 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
         {/* Top Section: Branding + Socials */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10">
           <div className="footer-brand flex items-center gap-2">
-            <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-              Alexandra Hockett
+            {/* Modified text with border effect */}
+            <span className="text-2xl font-bold relative">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 relative z-10">
+                Alexandra Hockett
+              </span>
+              {/* Text stroke effect using text-shadow */}
+              <span
+                className="absolute inset-0 text-2xl font-bold bg-clip-text text-transparent z-0"
+                style={{
+                  textShadow: `
+                    -1px -1px 0 rgba(255,255,255,0.4),  
+                    1px -1px 0 rgba(255,255,255,0.4),
+                    -1px 1px 0 rgba(255,255,255,0.4),
+                    1px 1px 0 rgba(255,255,255,0.4)
+                  `,
+                }}
+              >
+                Alexandra Hockett
+              </span>
             </span>
             <span className="text-sm text-gray-400">Web Developer</span>
           </div>
