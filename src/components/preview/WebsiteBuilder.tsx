@@ -1,9 +1,13 @@
+// src/components/preview/WebsiteBuilder.tsx
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Import custom hooks
+import useWindowSize from "@/hooks/useWindowSize";
 
 // Import types and utilities
 import {
@@ -31,9 +35,15 @@ import TimelineEditor from "@/components/preview/TimelineEditor";
 import DraggableElement from "@/components/preview/DraggableElement";
 import TemplateSelector from "@/components/preview/TemplateSelector";
 
-gsap.registerPlugin(ScrollTrigger);
+// Register GSAP plugins on client side only
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const WebsiteBuilder: React.FC = () => {
+  // Get window size information from custom hook
+  const { isDesktop } = useWindowSize();
+
   // State management
   const [activeTemplate, setActiveTemplate] = useState<string>("business");
   const [activeColorTheme, setActiveColorTheme] = useState<string>("purple");
@@ -44,6 +54,7 @@ const WebsiteBuilder: React.FC = () => {
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("desktop");
   const [showTimelineEditor, setShowTimelineEditor] = useState<boolean>(false);
   const [showGridLines, setShowGridLines] = useState<boolean>(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
@@ -86,9 +97,12 @@ const WebsiteBuilder: React.FC = () => {
   useEffect(() => {
     if (!canvasRef.current || !elements.length) return;
 
-    timelineRef.current?.kill();
-    timelineRef.current = gsap.timeline();
-    initializeAnimations(elements, timelineRef.current);
+    // Only create timeline on client side
+    if (typeof window !== "undefined") {
+      timelineRef.current?.kill();
+      timelineRef.current = gsap.timeline();
+      initializeAnimations(elements, timelineRef.current);
+    }
 
     return () => {
       timelineRef.current?.kill();
@@ -106,6 +120,11 @@ const WebsiteBuilder: React.FC = () => {
     };
     setElements((prev) => [...prev, newElement]);
     setSelectedElement(newElement.id);
+
+    // Close mobile menu after adding element on smaller screens
+    if (!isDesktop) {
+      setIsMobileMenuOpen(false);
+    }
   };
 
   const updateElement = (id: string, updates: Partial<ElementData>) => {
@@ -115,20 +134,26 @@ const WebsiteBuilder: React.FC = () => {
   };
 
   const deleteElement = (id: string) => {
-    gsap.to(`#element-${id}`, {
-      opacity: 0,
-      scale: 0.8,
-      duration: 0.3,
-      onComplete: () => {
-        setElements((prev) => prev.filter((el) => el.id !== id));
-        setSelectedElement(null);
-      },
-    });
+    if (typeof window !== "undefined") {
+      gsap.to(`#element-${id}`, {
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.3,
+        onComplete: () => {
+          setElements((prev) => prev.filter((el) => el.id !== id));
+          setSelectedElement(null);
+        },
+      });
+    } else {
+      // Fallback for SSR
+      setElements((prev) => prev.filter((el) => el.id !== id));
+      setSelectedElement(null);
+    }
   };
 
   const toggleWatermarkHandler = () => {
     setShowWatermark((prev) => !prev);
-    if (!showWatermark) {
+    if (!showWatermark && typeof window !== "undefined") {
       gsap.fromTo(
         ".upgrade-message",
         { opacity: 0, y: 20 },
@@ -151,9 +176,56 @@ const WebsiteBuilder: React.FC = () => {
   };
 
   const resetAnimations = () => {
-    if (timelineRef.current) {
+    if (timelineRef.current && typeof window !== "undefined") {
       timelineRef.current = resetAnimationsUtil(elements, timelineRef.current);
       timelineRef.current.play(0); // Restart animation for preview
+    }
+  };
+
+  // Toggle sidebar panel and open mobile menu if needed
+  const handleSidebarChange = (panel: SidebarPanel) => {
+    setActiveSidebar(panel);
+    setIsMobileMenuOpen(true);
+  };
+
+  // Render current sidebar panel content
+  const renderSidebarContent = () => {
+    switch (activeSidebar) {
+      case "elements":
+        return <ElementsPanel onAddElement={addElement} />;
+      case "animations":
+        return (
+          <AnimationsPanel
+            selectedElement={selectedElement}
+            elements={elements}
+            onApplyAnimation={(id, animation) =>
+              updateElement(id, { animation })
+            }
+            onResetAnimations={resetAnimations}
+            onToggleTimelineEditor={() =>
+              setShowTimelineEditor((prev) => !prev)
+            }
+            showTimelineEditor={showTimelineEditor}
+          />
+        );
+      case "theme":
+        return (
+          <ThemePanel
+            activeColorTheme={activeColorTheme}
+            onSelectTheme={setActiveColorTheme}
+            onToggleGridLines={() => setShowGridLines((prev) => !prev)}
+            showGridLines={showGridLines}
+          />
+        );
+      case "device":
+        return (
+          <DevicePanel
+            activeDevice={previewDevice}
+            onSelectDevice={setPreviewDevice}
+          />
+        );
+      default:
+        return <ElementsPanel onAddElement={addElement} />;
     }
   };
 
@@ -175,57 +247,217 @@ const WebsiteBuilder: React.FC = () => {
       </motion.section>
 
       {/* Main Editor */}
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar */}
-        <motion.aside
-          {...fadeIn}
-          className="lg:w-72 bg-gradient-to-br from-gray-900/90 to-indigo-950/90 rounded-2xl border border-indigo-500/20 p-4"
-        >
-          <nav className="flex justify-around border-b border-indigo-700/50 mb-4">
+      <div className="relative flex flex-col lg:flex-row gap-6">
+        {/* Mobile Sidebar Toggle Button (visible on smaller screens) */}
+        <div className="lg:hidden flex justify-center mb-4">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white flex items-center"
+          >
+            {isMobileMenuOpen ? (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-2"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                Close Panel
+              </>
+            ) : (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-2"
+                >
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+                Open Editor Panel
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Navigation Tabs (always visible on mobile) */}
+        <div className="lg:hidden bg-gradient-to-br from-gray-900/90 to-indigo-950/90 rounded-2xl border border-indigo-500/20 p-2 mb-4">
+          <nav className="flex justify-around">
             {["elements", "animations", "theme", "device"].map((tab) => (
               <button
                 key={tab}
-                className={`p-3 text-sm font-medium ${activeSidebar === tab ? "text-purple-400 border-b-2 border-purple-400" : "text-gray-400 hover:text-gray-300"}`}
-                onClick={() => setActiveSidebar(tab as SidebarPanel)}
+                className={`p-3 text-sm font-medium flex flex-col items-center ${
+                  activeSidebar === tab
+                    ? "text-purple-400 border-b-2 border-purple-400"
+                    : "text-gray-400 hover:text-gray-300"
+                }`}
+                onClick={() => handleSidebarChange(tab as SidebarPanel)}
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === "elements" && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mb-1"
+                  >
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                )}
+                {tab === "animations" && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mb-1"
+                  >
+                    <path d="M5 12h14"></path>
+                    <path d="M12 5v14"></path>
+                  </svg>
+                )}
+                {tab === "theme" && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mb-1"
+                  >
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"></path>
+                  </svg>
+                )}
+                {tab === "device" && (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mb-1"
+                  >
+                    <rect
+                      x="5"
+                      y="2"
+                      width="14"
+                      height="20"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  </svg>
+                )}
+                <span>{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
               </button>
             ))}
           </nav>
-          <div className="h-[650px] overflow-y-auto">
-            {activeSidebar === "elements" && (
-              <ElementsPanel onAddElement={addElement} />
-            )}
-            {activeSidebar === "animations" && (
-              <AnimationsPanel
-                selectedElement={selectedElement}
-                elements={elements}
-                onApplyAnimation={(id, animation) =>
-                  updateElement(id, { animation })
-                }
-                onResetAnimations={resetAnimations}
-                onToggleTimelineEditor={() =>
-                  setShowTimelineEditor((prev) => !prev)
-                }
-                showTimelineEditor={showTimelineEditor}
-              />
-            )}
-            {activeSidebar === "theme" && (
-              <ThemePanel
-                activeColorTheme={activeColorTheme}
-                onSelectTheme={setActiveColorTheme}
-                onToggleGridLines={() => setShowGridLines((prev) => !prev)}
-                showGridLines={showGridLines}
-              />
-            )}
-            {activeSidebar === "device" && (
-              <DevicePanel
-                activeDevice={previewDevice}
-                onSelectDevice={setPreviewDevice}
-              />
-            )}
-          </div>
-        </motion.aside>
+        </div>
+
+        {/* Sidebar on desktop (always visible) or mobile (toggleable) */}
+        <AnimatePresence>
+          {(isMobileMenuOpen || isDesktop) && (
+            <motion.aside
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -20, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`z-20 bg-gradient-to-br from-gray-900/90 to-indigo-950/90 rounded-2xl border border-indigo-500/20 p-4 ${
+                isMobileMenuOpen
+                  ? "absolute top-0 left-0 right-0 lg:relative lg:w-72"
+                  : "lg:w-72"
+              }`}
+            >
+              {/* Desktop nav tabs */}
+              <nav className="hidden lg:flex justify-around border-b border-indigo-700/50 mb-4">
+                {["elements", "animations", "theme", "device"].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`p-3 text-sm font-medium ${
+                      activeSidebar === tab
+                        ? "text-purple-400 border-b-2 border-purple-400"
+                        : "text-gray-400 hover:text-gray-300"
+                    }`}
+                    onClick={() => setActiveSidebar(tab as SidebarPanel)}
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </button>
+                ))}
+              </nav>
+
+              {/* Mobile close button */}
+              <div className="lg:hidden flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-white">
+                  {activeSidebar.charAt(0).toUpperCase() +
+                    activeSidebar.slice(1)}{" "}
+                  Panel
+                </h3>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <div className="h-[650px] overflow-y-auto">
+                {renderSidebarContent()}
+              </div>
+            </motion.aside>
+          )}
+        </AnimatePresence>
 
         {/* Canvas */}
         <motion.div {...fadeIn} className="flex-1">
@@ -243,7 +475,13 @@ const WebsiteBuilder: React.FC = () => {
             </div>
             <div
               ref={canvasRef}
-              className={`bg-white rounded-b-lg overflow-hidden transition-all duration-300 ${previewDevice === "desktop" ? "w-full" : previewDevice === "tablet" ? "w-[768px]" : "w-[375px]"} mx-auto`}
+              className={`bg-white rounded-b-lg overflow-hidden transition-all duration-300 mx-auto ${
+                previewDevice === "desktop"
+                  ? "w-full"
+                  : previewDevice === "tablet"
+                    ? "max-w-[768px] w-full"
+                    : "max-w-[375px] w-full"
+              }`}
             >
               <div
                 className="min-h-[600px] p-6 relative"
@@ -323,7 +561,7 @@ const WebsiteBuilder: React.FC = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-            <div className="mt-4 flex justify-between">
+            <div className="mt-4 flex flex-wrap gap-2 justify-between">
               <div className="space-x-2">
                 <button
                   className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white"
