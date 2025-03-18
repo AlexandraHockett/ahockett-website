@@ -46,8 +46,8 @@ export default function CTASection() {
             key={i}
             className="absolute rounded-full bg-gradient-to-br from-purple-500/40 to-indigo-500/40 shadow-[0_0_15px_rgba(147,51,234,0.5)]"
             style={{
-              width: values.width,
-              height: values.height,
+              width: `${values.width}px`,
+              height: `${values.height}px`,
               top: `${values.top}%`,
               left: `${values.left}%`,
             }}
@@ -75,15 +75,13 @@ export default function CTASection() {
             y: -15,
             scale: 1.02,
             boxShadow: "0 20px 40px rgba(147, 51, 234, 0.6)",
-            rotateX: 2,
-            rotateY: 2,
+            // Removed rotateX and rotateY as they might cause issues
           }}
           transition={{
-            duration: 0.8, // For initial animation
+            duration: 0.8,
             ease: "easeOut",
             type: "spring",
             stiffness: 80,
-            // Hover transition handled separately within Framer Motion
           }}
           className="bg-gradient-to-br from-gray-900/80 to-black/80 backdrop-blur-xl rounded-3xl p-10 border border-white/20 shadow-2xl max-w-3xl mx-auto"
         >
@@ -109,7 +107,7 @@ export default function CTASection() {
             </motion.span>
           </h2>
           <p className="text-gray-200 text-xl md:text-2xl mb-10 max-w-2xl mx-auto leading-relaxed">
-            Let’s collaborate to craft a breathtaking website that captivates
+            Let's collaborate to craft a breathtaking website that captivates
             your audience and skyrockets your impact.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -120,10 +118,7 @@ export default function CTASection() {
               }}
               transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
             >
-              <Button
-                title="Get a Quote"
-                href="/quote"
-              />
+              <Button title="Get a Quote" href="/quote" />
             </motion.div>
             <motion.div
               whileHover={{
@@ -132,10 +127,7 @@ export default function CTASection() {
               }}
               transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
             >
-              <Button
-                title="Contact Me"
-                href="/contact"
-              />
+              <Button title="Contact Me" href="/contact" />
             </motion.div>
           </div>
         </motion.div>
