@@ -1,10 +1,12 @@
-// src/components/preview/WebsiteBuilder.tsx
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Import React Icons
+import { FaCube, FaPlay, FaPalette, FaMobileAlt } from "react-icons/fa";
 
 // Import custom hooks
 import useWindowSize from "@/hooks/useWindowSize";
@@ -41,7 +43,6 @@ if (typeof window !== "undefined") {
 }
 
 const WebsiteBuilder: React.FC = () => {
-  // Get window size information from custom hook
   const { isDesktop } = useWindowSize();
 
   // State management
@@ -97,7 +98,6 @@ const WebsiteBuilder: React.FC = () => {
   useEffect(() => {
     if (!canvasRef.current || !elements.length) return;
 
-    // Only create timeline on client side
     if (typeof window !== "undefined") {
       timelineRef.current?.kill();
       timelineRef.current = gsap.timeline();
@@ -121,7 +121,6 @@ const WebsiteBuilder: React.FC = () => {
     setElements((prev) => [...prev, newElement]);
     setSelectedElement(newElement.id);
 
-    // Close mobile menu after adding element on smaller screens
     if (!isDesktop) {
       setIsMobileMenuOpen(false);
     }
@@ -145,7 +144,6 @@ const WebsiteBuilder: React.FC = () => {
         },
       });
     } else {
-      // Fallback for SSR
       setElements((prev) => prev.filter((el) => el.id !== id));
       setSelectedElement(null);
     }
@@ -178,17 +176,17 @@ const WebsiteBuilder: React.FC = () => {
   const resetAnimations = () => {
     if (timelineRef.current && typeof window !== "undefined") {
       timelineRef.current = resetAnimationsUtil(elements, timelineRef.current);
-      timelineRef.current.play(0); // Restart animation for preview
+      timelineRef.current.play(0);
     }
   };
 
-  // Toggle sidebar panel and open mobile menu if needed
   const handleSidebarChange = (panel: SidebarPanel) => {
     setActiveSidebar(panel);
-    setIsMobileMenuOpen(true);
+    if (!isDesktop) {
+      setIsMobileMenuOpen(true);
+    }
   };
 
-  // Render current sidebar panel content
   const renderSidebarContent = () => {
     switch (activeSidebar) {
       case "elements":
@@ -247,8 +245,8 @@ const WebsiteBuilder: React.FC = () => {
       </motion.section>
 
       {/* Main Editor */}
-      <div className="relative flex flex-col lg:flex-row gap-6">
-        {/* Mobile Sidebar Toggle Button (visible on smaller screens) */}
+      <div className="relative flex flex-col lg:flex-row gap-6 max-w-[1440px] mx-auto">
+        {/* Mobile Sidebar Toggle Button */}
         <div className="lg:hidden flex justify-center mb-4">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -297,103 +295,32 @@ const WebsiteBuilder: React.FC = () => {
           </button>
         </div>
 
-        {/* Navigation Tabs (always visible on mobile) */}
+        {/* Navigation Tabs for Mobile */}
         <div className="lg:hidden bg-gradient-to-br from-gray-900/90 to-indigo-950/90 rounded-2xl border border-indigo-500/20 p-2 mb-4">
-          <nav className="flex justify-around">
-            {["elements", "animations", "theme", "device"].map((tab) => (
+          <nav className="flex justify-between space-x-2">
+            {[
+              { id: "elements", icon: <FaCube />, label: "Elements" },
+              { id: "animations", icon: <FaPlay />, label: "Animations" },
+              { id: "theme", icon: <FaPalette />, label: "Theme" },
+              { id: "device", icon: <FaMobileAlt />, label: "Device" },
+            ].map((tab) => (
               <button
-                key={tab}
-                className={`p-3 text-sm font-medium flex flex-col items-center ${
-                  activeSidebar === tab
+                key={tab.id}
+                className={`flex-1 p-2 text-sm font-medium flex flex-col items-center ${
+                  activeSidebar === tab.id
                     ? "text-purple-400 border-b-2 border-purple-400"
                     : "text-gray-400 hover:text-gray-300"
                 }`}
-                onClick={() => handleSidebarChange(tab as SidebarPanel)}
+                onClick={() => handleSidebarChange(tab.id as SidebarPanel)}
               >
-                {tab === "elements" && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mb-1"
-                  >
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
-                  </svg>
-                )}
-                {tab === "animations" && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mb-1"
-                  >
-                    <path d="M5 12h14"></path>
-                    <path d="M12 5v14"></path>
-                  </svg>
-                )}
-                {tab === "theme" && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mb-1"
-                  >
-                    <circle cx="12" cy="12" r="5"></circle>
-                    <path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"></path>
-                  </svg>
-                )}
-                {tab === "device" && (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="mb-1"
-                  >
-                    <rect
-                      x="5"
-                      y="2"
-                      width="14"
-                      height="20"
-                      rx="2"
-                      ry="2"
-                    ></rect>
-                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                  </svg>
-                )}
-                <span>{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
+                <span className="text-xl">{tab.icon}</span>
+                <span className="text-xs mt-1">{tab.label}</span>
               </button>
             ))}
           </nav>
         </div>
 
-        {/* Sidebar on desktop (always visible) or mobile (toggleable) */}
+        {/* Sidebar */}
         <AnimatePresence>
           {(isMobileMenuOpen || isDesktop) && (
             <motion.aside
@@ -401,25 +328,27 @@ const WebsiteBuilder: React.FC = () => {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -20, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className={`z-20 bg-gradient-to-br from-gray-900/90 to-indigo-950/90 rounded-2xl border border-indigo-500/20 p-4 ${
-                isMobileMenuOpen
-                  ? "absolute top-0 left-0 right-0 lg:relative lg:w-72"
-                  : "lg:w-72"
-              }`}
+              className="z-20 bg-gradient-to-br from-gray-900/90 to-indigo-950/90 rounded-2xl border border-indigo-500/20 p-4 w-full lg:w-80 max-w-[320px]"
             >
               {/* Desktop nav tabs */}
-              <nav className="hidden lg:flex justify-around border-b border-indigo-700/50 mb-4">
-                {["elements", "animations", "theme", "device"].map((tab) => (
+              <nav className="hidden lg:flex justify-between space-x-2 border-b border-indigo-700/50 mb-4">
+                {[
+                  { id: "elements", icon: <FaCube />, label: "Elements" },
+                  { id: "animations", icon: <FaPlay />, label: "Animations" },
+                  { id: "theme", icon: <FaPalette />, label: "Theme" },
+                  { id: "device", icon: <FaMobileAlt />, label: "Device" },
+                ].map((tab) => (
                   <button
-                    key={tab}
-                    className={`p-3 text-sm font-medium ${
-                      activeSidebar === tab
+                    key={tab.id}
+                    className={`flex-1 p-3 text-sm font-medium flex flex-col items-center ${
+                      activeSidebar === tab.id
                         ? "text-purple-400 border-b-2 border-purple-400"
                         : "text-gray-400 hover:text-gray-300"
                     }`}
-                    onClick={() => setActiveSidebar(tab as SidebarPanel)}
+                    onClick={() => setActiveSidebar(tab.id as SidebarPanel)}
                   >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    <span className="text-xl">{tab.icon}</span>
+                    <span className="text-xs mt-1">{tab.label}</span>
                   </button>
                 ))}
               </nav>
@@ -460,7 +389,7 @@ const WebsiteBuilder: React.FC = () => {
         </AnimatePresence>
 
         {/* Canvas */}
-        <motion.div {...fadeIn} className="flex-1">
+        <motion.div {...fadeIn} className="flex-1 w-full">
           <div className="bg-gradient-to-br from-gray-900/90 to-indigo-950/90 rounded-2xl border border-indigo-500/20 p-4">
             <div className="bg-gray-800 rounded-t-lg p-2 flex justify-between items-center">
               <div className="flex gap-2">
@@ -477,10 +406,10 @@ const WebsiteBuilder: React.FC = () => {
               ref={canvasRef}
               className={`bg-white rounded-b-lg overflow-hidden transition-all duration-300 mx-auto ${
                 previewDevice === "desktop"
-                  ? "w-full"
+                  ? "w-full max-w-[1200px]"
                   : previewDevice === "tablet"
-                    ? "max-w-[768px] w-full"
-                    : "max-w-[375px] w-full"
+                    ? "w-full max-w-[768px]"
+                    : "w-full max-w-[375px]"
               }`}
             >
               <div
