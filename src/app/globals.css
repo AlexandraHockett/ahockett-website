@@ -20,7 +20,9 @@
     --foreground: #ededed;
   }
 }
-
+body {
+  background-color: #000000;
+}
 /* Remova ou comente os @font-face, pois agora estamos usando a API de fontes do Next.js */
 /* 
 @layer base {
@@ -51,4 +53,26 @@
   .floating-nav {
     @apply bg-black rounded-lg border border-white/10;
   }
+}
+
+/*FeaturedProjectSection*/
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 4s infinite ease-in-out;
+}
+
+.custom-radial-gradient {
+  background: radial-gradient(
+    circle at center,
+    rgba(147, 51, 234, 0.25),
+    transparent 70%
+  );
 }
