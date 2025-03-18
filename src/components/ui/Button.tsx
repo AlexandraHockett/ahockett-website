@@ -12,6 +12,7 @@ interface ButtonProps {
   href?: string;
   type?: "button" | "submit" | "reset";
   disabled?: boolean;
+  target?: string; // Add this line
   onClick?: (
     e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
   ) => void;
@@ -27,6 +28,7 @@ const Button: React.FC<ButtonProps> = memo(
     href,
     type = "button",
     disabled = false,
+    target, // Add this line
     onClick,
   }) => {
     // Button content with thicker border (p-[2px] instead of p-[1px])
@@ -52,7 +54,7 @@ const Button: React.FC<ButtonProps> = memo(
           <a
             href={href}
             id={id}
-            target="_blank"
+            target={target} // Pass the target prop
             rel="noopener noreferrer"
             className="inline-block"
             onClick={onClick}
@@ -62,7 +64,12 @@ const Button: React.FC<ButtonProps> = memo(
         );
       } else {
         return (
-          <Link href={href} className="inline-block" onClick={onClick}>
+          <Link
+            href={href}
+            className="inline-block"
+            onClick={onClick}
+            target={target} // Pass the target prop
+          >
             {buttonContent}
           </Link>
         );
