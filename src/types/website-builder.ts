@@ -41,7 +41,7 @@ export interface ElementData {
   content?: string;
   animation?: AnimationPreset;
   animationDelay?: number;
-  gridPosition?: { row: number; col: number };
+  position?: { x: number; y: number };
   styles?: Record<string, string>;
 }
 

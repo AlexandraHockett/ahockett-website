@@ -16,12 +16,13 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
   const devices: {
     id: PreviewDevice;
     name: string;
-    icon: React.ReactNode;
     width: string;
+    icon: React.ReactNode;
   }[] = [
     {
       id: "desktop",
       name: "Desktop",
+      width: "1920px",
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -39,11 +40,11 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
           <line x1="12" y1="17" x2="12" y2="21"></line>
         </svg>
       ),
-      width: "1920px",
     },
     {
       id: "tablet",
       name: "Tablet",
+      width: "768px",
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -60,11 +61,11 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
           <line x1="12" y1="18" x2="12.01" y2="18"></line>
         </svg>
       ),
-      width: "768px",
     },
     {
       id: "mobile",
       name: "Mobile",
+      width: "375px",
       icon: (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -81,7 +82,6 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
           <line x1="12" y1="18" x2="12.01" y2="18"></line>
         </svg>
       ),
-      width: "375px",
     },
   ];
 
@@ -158,6 +158,80 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
             </li>
           </ul>
         </div>
+      </div>
+
+      {/* Device-specific settings */}
+      <div className="pt-4 border-t border-gray-700/50 mt-4">
+        <h4 className="text-sm text-purple-300 font-medium uppercase mb-3">
+          {activeDevice.charAt(0).toUpperCase() + activeDevice.slice(1)}{" "}
+          Settings
+        </h4>
+
+        <div className="bg-gray-800/50 rounded-lg p-3">
+          <div className="flex flex-col">
+            <label htmlFor="font-size" className="text-white text-xs mb-1">
+              Font Scaling
+            </label>
+            <select
+              id="font-size"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
+            >
+              <option value="100">100% (Default)</option>
+              <option value="125">125% (Large)</option>
+              <option value="75">75% (Small)</option>
+            </select>
+          </div>
+        </div>
+
+        {activeDevice === "mobile" && (
+          <div className="mt-2 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 rounded-lg p-3">
+            <div className="flex items-start">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-yellow-400 mr-2 mt-0.5"
+              >
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <p className="text-yellow-200 text-xs">
+                Mobile view shows simplified layout. Some advanced features may
+                be hidden on small screens.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="pt-4 mt-4">
+        <button className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-colors duration-300 flex items-center justify-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mr-2"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          Preview as Visitor
+        </button>
       </div>
     </div>
   );

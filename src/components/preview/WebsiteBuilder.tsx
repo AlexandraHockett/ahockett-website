@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Draggable } from "gsap/Draggable";
 
 // Import React Icons
 import { FaCube, FaPlay, FaPalette, FaMobileAlt } from "react-icons/fa";
@@ -17,6 +18,7 @@ import {
   ElementData,
   SidebarPanel,
   PreviewDevice,
+  AnimationPreset,
 } from "@/types/website-builder";
 import {
   templates,
@@ -39,14 +41,14 @@ import TemplateSelector from "@/components/preview/TemplateSelector";
 
 // Register GSAP plugins on client side only
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
+  gsap.registerPlugin(ScrollTrigger, Draggable);
 }
 
 const WebsiteBuilder: React.FC = () => {
   const { isDesktop } = useWindowSize();
 
   // State management
-  const [activeTemplate, setActiveTemplate] = useState<string>("business");
+  const [activeTemplate, setActiveTemplate] = useState<string>("minimal");
   const [activeColorTheme, setActiveColorTheme] = useState<string>("purple");
   const [elements, setElements] = useState<ElementData[]>([]);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
@@ -56,9 +58,13 @@ const WebsiteBuilder: React.FC = () => {
   const [showTimelineEditor, setShowTimelineEditor] = useState<boolean>(false);
   const [showGridLines, setShowGridLines] = useState<boolean>(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
 
+  // Refs
   const canvasRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
+  const dragSourceRef = useRef<string | null>(null);
+  const draggableInstancesRef = useRef<Draggable[]>([]); // Store Draggable instances
 
   // Animation variants
   const fadeIn = {
@@ -109,15 +115,124 @@ const WebsiteBuilder: React.FC = () => {
     };
   }, [elements, showTimelineEditor]);
 
+  // Initialize drag and drop functionality for sidebar elements
+  useEffect(() => {
+    const elementItems = document.querySelectorAll(".element-item");
+    const canvas = canvasRef.current;
+
+    if (!canvas || !elementItems.length) return;
+
+    // Clean up previous instances
+    draggableInstancesRef.current.forEach((d) => d.kill());
+    draggableInstancesRef.current = [];
+
+    // Setup draggable elements in the sidebar
+    elementItems.forEach((item) => {
+      const draggableInstance = Draggable.create(item, {
+        type: "x,y",
+        bounds: document.body,
+        onDragStart: function () {
+          setIsDragging(true);
+          const targetElement = this.target as HTMLElement;
+          const elementType = targetElement.getAttribute(
+            "data-element-type"
+          ) as ElementType;
+          if (elementType) {
+            dragSourceRef.current = elementType;
+          }
+
+          // Visual feedback
+          gsap.to(this.target, {
+            scale: 0.8,
+            opacity: 0.8,
+            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
+            duration: 0.3,
+          });
+        },
+        onDrag: function (e) {
+          // Check if we're over the canvas
+          const bounds = canvas.getBoundingClientRect();
+          const isOverCanvas =
+            e.clientX >= bounds.left &&
+            e.clientX <= bounds.right &&
+            e.clientY >= bounds.top &&
+            e.clientY <= bounds.bottom;
+
+          // Visual feedback when over dropzone
+          if (isOverCanvas) {
+            canvas.classList.add("canvas-highlight");
+          } else {
+            canvas.classList.remove("canvas-highlight");
+          }
+        },
+        onDragEnd: function (e) {
+          setIsDragging(false);
+
+          // Reset visual state
+          gsap.to(this.target, {
+            scale: 1,
+            opacity: 1,
+            boxShadow: "none",
+            duration: 0.3,
+            clearProps: "all",
+          });
+
+          // Check if dropped over the canvas
+          const bounds = canvas.getBoundingClientRect();
+          const isOverCanvas =
+            e.clientX >= bounds.left &&
+            e.clientX <= bounds.right &&
+            e.clientY >= bounds.top &&
+            e.clientY <= bounds.bottom;
+
+          canvas.classList.remove("canvas-highlight");
+
+          if (isOverCanvas && dragSourceRef.current) {
+            // Calculate relative position within canvas
+            const x = e.clientX - bounds.left;
+            const y = e.clientY - bounds.top;
+
+            // Calculate grid position if grid is enabled
+            const gridCol = showGridLines ? Math.floor(x / 20) : Math.floor(x);
+            const gridRow = showGridLines ? Math.floor(y / 20) : Math.floor(y);
+
+            // Add new element
+            addElement(dragSourceRef.current as ElementType, {
+              row: gridRow,
+              col: gridCol,
+            });
+          }
+
+          dragSourceRef.current = null;
+        },
+      })[0]; // Get the first instance from the array returned by Draggable.create
+
+      draggableInstancesRef.current.push(draggableInstance);
+    });
+
+    return () => {
+      // Clean up draggables
+      draggableInstancesRef.current.forEach((d) => d.kill());
+      draggableInstancesRef.current = [];
+    };
+  }, [activeSidebar, elements, showGridLines]);
+
   // Handlers
-  const addElement = (type: ElementType) => {
+  const addElement = (
+    type: ElementType,
+    position?: { row: number; col: number } // Ainda recebido como row/col do drag-and-drop
+  ) => {
     const newElement: ElementData = {
       id: `${type}-${Date.now()}`,
       type,
       content: getDefaultContent(type),
-      animation: "fadeIn",
+      animation: undefined,
       animationDelay: 0,
+      position: position
+        ? { x: position.col * 20, y: position.row * 20 } // Converter para x/y
+        : { x: 0, y: 0 },
     };
+
     setElements((prev) => [...prev, newElement]);
     setSelectedElement(newElement.id);
 
@@ -187,6 +302,44 @@ const WebsiteBuilder: React.FC = () => {
     }
   };
 
+  const applyAnimation = (id: string, animation: AnimationPreset) => {
+    updateElement(id, { animation });
+
+    const elementNode = document.getElementById(`element-${id}`);
+    if (elementNode && typeof window !== "undefined") {
+      const tl = gsap.timeline();
+
+      switch (animation) {
+        case "fadeIn":
+          tl.fromTo(
+            elementNode,
+            { opacity: 0 },
+            { opacity: 1, duration: 0.8, ease: "power2.out" }
+          );
+          break;
+        case "slideIn":
+          tl.fromTo(
+            elementNode,
+            { x: -50, opacity: 0 },
+            { x: 0, opacity: 1, duration: 0.8, ease: "power2.out" }
+          );
+          break;
+        case "bounce":
+          tl.fromTo(
+            elementNode,
+            { y: -20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 1.2, ease: "elastic.out(1, 0.5)" }
+          );
+          break;
+        default:
+          tl.to(elementNode, {
+            boxShadow: "0 0 0 2px rgba(147, 51, 234, 0.8)",
+            duration: 0.3,
+          }).to(elementNode, { boxShadow: "none", duration: 0.3 });
+      }
+    }
+  };
+
   const renderSidebarContent = () => {
     switch (activeSidebar) {
       case "elements":
@@ -196,9 +349,7 @@ const WebsiteBuilder: React.FC = () => {
           <AnimationsPanel
             selectedElement={selectedElement}
             elements={elements}
-            onApplyAnimation={(id, animation) =>
-              updateElement(id, { animation })
-            }
+            onApplyAnimation={applyAnimation}
             onResetAnimations={resetAnimations}
             onToggleTimelineEditor={() =>
               setShowTimelineEditor((prev) => !prev)
@@ -330,7 +481,6 @@ const WebsiteBuilder: React.FC = () => {
               transition={{ duration: 0.3 }}
               className="z-20 bg-gradient-to-br from-gray-900/90 to-indigo-950/90 rounded-2xl border border-indigo-500/20 p-4 w-full lg:w-80 max-w-[320px]"
             >
-              {/* Desktop nav tabs */}
               <nav className="hidden lg:flex justify-between space-x-2 border-b border-indigo-700/50 mb-4">
                 {[
                   { id: "elements", icon: <FaCube />, label: "Elements" },
@@ -353,7 +503,6 @@ const WebsiteBuilder: React.FC = () => {
                 ))}
               </nav>
 
-              {/* Mobile close button */}
               <div className="lg:hidden flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-white">
                   {activeSidebar.charAt(0).toUpperCase() +
@@ -381,7 +530,7 @@ const WebsiteBuilder: React.FC = () => {
                 </button>
               </div>
 
-              <div className="h-[650px] overflow-y-auto">
+              <div className="h-[650px] overflow-y-auto custom-scrollbar">
                 {renderSidebarContent()}
               </div>
             </motion.aside>
@@ -413,7 +562,7 @@ const WebsiteBuilder: React.FC = () => {
               }`}
             >
               <div
-                className="min-h-[600px] p-6 relative"
+                className="min-h-[600px] p-6 relative canvas-area"
                 style={{
                   background: showGridLines
                     ? "linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px)"
@@ -443,8 +592,16 @@ const WebsiteBuilder: React.FC = () => {
                         Add Elements to Get Started
                       </h3>
                       <p className="text-gray-600">
-                        Click on an element from the sidebar to add it to your
-                        canvas
+                        {isDragging ? (
+                          <span className="text-purple-600 font-medium">
+                            Drop here to add to canvas!
+                          </span>
+                        ) : (
+                          <span>
+                            Drag an element from the sidebar or click to add to
+                            your canvas
+                          </span>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -460,14 +617,17 @@ const WebsiteBuilder: React.FC = () => {
                     }
                     onDelete={() => deleteElement(element.id)}
                     showGridLines={showGridLines}
+                    onPositionUpdate={(x: number, y: number) =>
+                      updateElement(element.id, { position: { x, y } })
+                    } // Adicionado
                   />
                 ))}
                 {showWatermark && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 text-center">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 text-center font-medium shadow-lg">
                     Preview Mode - Contact me for a custom solution!
                   </div>
                 )}
-                <div className="upgrade-message absolute top-4 left-1/2 -translate-x-1/2 bg-indigo-900/90 text-white py-2 px-4 rounded-lg opacity-0">
+                <div className="upgrade-message absolute top-4 left-1/2 -translate-x-1/2 bg-indigo-900/90 text-white py-2 px-4 rounded-lg opacity-0 shadow-lg">
                   Upgrade for the full experience!
                 </div>
               </div>
@@ -493,23 +653,23 @@ const WebsiteBuilder: React.FC = () => {
             <div className="mt-4 flex flex-wrap gap-2 justify-between">
               <div className="space-x-2">
                 <button
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white"
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors duration-200"
                   onClick={() => setElements([])}
                 >
-                  Clear
+                  Clear Canvas
                 </button>
                 <button
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white"
+                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white transition-colors duration-200"
                   onClick={toggleWatermarkHandler}
                 >
                   {showWatermark ? "Hide" : "Show"} Watermark
                 </button>
               </div>
               <button
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-white"
+                className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg text-white shadow-md transition-all duration-200 hover:shadow-lg"
                 onClick={() => (window.location.href = "/quote")}
               >
-                Get Started
+                Get a Custom Quote
               </button>
             </div>
           </div>
@@ -542,7 +702,10 @@ const WebsiteBuilder: React.FC = () => {
               desc: "Add life with professional animations.",
             },
           ].map((item) => (
-            <div key={item.step} className="bg-gray-800/50 rounded-lg p-4">
+            <div
+              key={item.step}
+              className="bg-gray-800/50 rounded-lg p-4 transition-transform duration-300 hover:-translate-y-2"
+            >
               <span className="text-purple-400 text-2xl font-bold">
                 {item.step}
               </span>
