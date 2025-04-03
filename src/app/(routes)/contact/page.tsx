@@ -1,10 +1,11 @@
+// src/app/(routes)/contact/page.tsx
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import ContactForm from "@/components/contact/contactForm";
+import EnhancedContactForm from "@/components/contact/EnhancedContactForm";
 import Button from "@/components/ui/Button";
 
 // Register GSAP ScrollTrigger
@@ -14,7 +15,6 @@ if (typeof window !== "undefined") {
 
 export default function ContactPage() {
   const headerRef = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState<"form" | "calendar">("form");
 
   useEffect(() => {
     if (!headerRef.current) return;
@@ -53,8 +53,9 @@ export default function ContactPage() {
             Let's Connect
           </h1>
           <p className="text-xl text-gray-300 mb-10">
-            Ready to create a website that wows? I'd love to hear about your
-            project. Get in touch and let's bring your vision to life.
+            Have a project in mind? Fill out the multi-step form below with your
+            project details, and I'll get back to you with a personalized
+            response within 24-48 hours.
           </p>
         </motion.div>
       </div>
@@ -76,6 +77,7 @@ export default function ContactPage() {
               </h2>
 
               <div className="space-y-6">
+                {/* Existing contact info cards */}
                 <div className="flex items-start space-x-4">
                   <div className="bg-purple-500/20 p-3 rounded-lg text-purple-300">
                     <svg
@@ -155,7 +157,49 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Social Links */}
+            {/* Added Feature: Availability Calendar Preview */}
+            <div className="bg-gradient-to-br from-gray-900/80 to-black/80 backdrop-blur-md rounded-xl p-6 border border-purple-500/30 shadow-xl">
+              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400 mb-6">
+                Current Availability
+              </h2>
+
+              <div className="mb-4 p-3 bg-gradient-to-r from-green-500/20 to-green-600/20 rounded-lg">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                  <p className="text-white font-medium">
+                    Now Accepting Projects
+                  </p>
+                </div>
+                <p className="text-gray-300 text-sm mt-1 ml-5">
+                  Available to start new projects in 2-3 weeks
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300">Website Development</span>
+                  <span className="text-green-400">Available</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300">Web Application</span>
+                  <span className="text-yellow-400">Limited</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300">Website Maintenance</span>
+                  <span className="text-green-400">Available</span>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <Button
+                  title="Schedule a Call"
+                  href="#calendar"
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            {/* Social Links - Keep this from the original */}
             <div className="bg-gradient-to-br from-gray-900/80 to-black/80 backdrop-blur-md rounded-xl p-6 border border-purple-500/30 shadow-xl">
               <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400 mb-6">
                 Connect With Me
@@ -231,119 +275,71 @@ export default function ContactPage() {
             </div>
           </motion.div>
 
-          {/* Form and Scheduling Tabs */}
+          {/* Form Section */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             className="lg:w-2/3"
           >
-            <div className="bg-gradient-to-br from-gray-900/80 to-black/80 backdrop-blur-md rounded-xl border border-purple-500/30 shadow-xl overflow-hidden">
-              {/* Tabs */}
-              <div className="flex border-b border-gray-700">
-                <button
-                  className={`flex-1 px-6 py-4 text-center font-medium transition-all duration-300 ${
-                    activeTab === "form"
-                      ? "bg-purple-900/30 text-white border-b-2 border-purple-500"
-                      : "bg-transparent text-gray-400 hover:text-gray-300"
-                  }`}
-                  onClick={() => setActiveTab("form")}
-                >
-                  Contact Form
-                </button>
-                <button
-                  className={`flex-1 px-6 py-4 text-center font-medium transition-all duration-300 ${
-                    activeTab === "calendar"
-                      ? "bg-purple-900/30 text-white border-b-2 border-purple-500"
-                      : "bg-transparent text-gray-400 hover:text-gray-300"
-                  }`}
-                  onClick={() => setActiveTab("calendar")}
-                >
-                  Schedule a Call
-                </button>
-              </div>
+            {/* Enhanced Multi-Step Form */}
+            <EnhancedContactForm />
 
-              {/* Tab Content */}
-              <div className="p-6">
-                {activeTab === "form" ? (
-                  <ContactForm />
-                ) : (
-                  <div className="text-center py-8">
-                    <h3 className="text-2xl font-bold text-white mb-6">
-                      Schedule a 30-Minute Consultation
-                    </h3>
-                    <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-                      Pick a time that works for you, and we'll have a
-                      no-obligation chat about your project needs and how I can
-                      help bring your vision to life.
-                    </p>
-
-                    <div className="rounded-xl overflow-hidden border border-purple-500/30 bg-gray-800/50 h-[450px] mb-6">
-                      {/* In a real application, this would be replaced with an actual calendar integration */}
-                      <div className="w-full h-full flex flex-col items-center justify-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="48"
-                          height="48"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="text-purple-400 mb-4"
-                        >
-                          <rect
-                            x="3"
-                            y="4"
-                            width="18"
-                            height="18"
-                            rx="2"
-                            ry="2"
-                          ></rect>
-                          <line x1="16" y1="2" x2="16" y2="6"></line>
-                          <line x1="8" y1="2" x2="8" y2="6"></line>
-                          <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                        <p className="text-white text-xl font-medium mb-2">
-                          Calendar Integration
-                        </p>
-                        <p className="text-gray-400 max-w-md text-center">
-                          Here you would see a Calendly or similar booking
-                          widget to schedule your call.
-                        </p>
-                      </div>
-                    </div>
-
-                    <Button
-                      title="Open Calendly Scheduler"
-                      href="https://calendly.com/ahockett"
-                      target="_blank"
-                    />
-                  </div>
-                )}
+            <div className="mt-8 bg-gradient-to-br from-purple-900/20 to-indigo-900/20 backdrop-blur-md rounded-lg p-4 border border-purple-500/20">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 mr-3">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-purple-400"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-white font-medium">
+                    Fast Response Guaranteed
+                  </h3>
+                  <p className="text-gray-300 text-sm">
+                    I prioritize clear communication and quick responses. You'll
+                    hear back from me within 24-48 hours with detailed
+                    information about your project.
+                  </p>
+                </div>
               </div>
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* Map Section */}
-      <section className="py-20 bg-gradient-to-b from-indigo-950/30 to-black">
+      {/* Call Scheduling Section */}
+      <section
+        id="calendar"
+        className="py-20 bg-gradient-to-b from-indigo-950/30 to-black"
+      >
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-center max-w-3xl mx-auto mb-16"
+            className="text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-400 mb-6">
-              Working Globally
+              Schedule a Call
             </h2>
-            <p className="text-xl text-gray-300">
-              While I work remotely, I collaborate with clients from around the
-              world to create stunning websites that make an impact.
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Prefer to talk? Schedule a free 30-minute consultation to discuss
+              your project needs.
             </p>
           </motion.div>
 
@@ -352,38 +348,127 @@ export default function ContactPage() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="rounded-xl overflow-hidden border border-purple-500/30 shadow-xl"
-            style={{ height: "400px" }}
+            className="max-w-4xl mx-auto"
           >
-            {/* In a real application, this would be a Google Maps or similar map integration */}
-            <div className="w-full h-full bg-gray-800/50 flex items-center justify-center">
-              <div className="text-center max-w-md px-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-purple-400 mb-4 mx-auto"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M8.5 3.5l7 7"></path>
-                  <path d="M8.5 20.5l7-7"></path>
-                  <path d="M3.5 8.5l7 7"></path>
-                  <path d="M20.5 8.5l-7 7"></path>
-                </svg>
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  Global Reach
+            <div className="bg-gradient-to-br from-gray-900/80 to-black/80 backdrop-blur-md rounded-xl p-8 border border-purple-500/30 shadow-xl">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-white mb-3">
+                  30-Minute Project Consultation
                 </h3>
                 <p className="text-gray-300">
-                  I work with clients across different time zones, offering
-                  flexible meeting times to ensure seamless collaboration no
-                  matter where you're located.
+                  Choose a time that works for you, and we'll discuss your
+                  project goals, requirements, and potential solutions.
                 </p>
+              </div>
+
+              {/* Calendar Widget Placeholder */}
+              <div className="h-96 bg-gray-800/50 rounded-xl mb-8 border border-gray-700/50 flex items-center justify-center">
+                <div className="text-center p-8">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-purple-400 mx-auto mb-4"
+                  >
+                    <rect
+                      x="3"
+                      y="4"
+                      width="18"
+                      height="18"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  <h4 className="text-xl font-bold text-white mb-3">
+                    Calendly Integration
+                  </h4>
+                  <p className="text-gray-300 mb-6">
+                    In a production environment, this would be replaced with an
+                    actual Calendly or similar booking widget.
+                  </p>
+                  <Button
+                    title="Open Scheduling Calendar"
+                    href="https://calendly.com"
+                    target="_blank"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/50">
+                <h4 className="text-white font-medium mb-2">What to Expect:</h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li className="flex items-start">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-purple-400 mr-2 flex-shrink-0"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span>
+                      Discussion of your project goals and requirements
+                    </span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-purple-400 mr-2 flex-shrink-0"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span>Initial recommendations and potential solutions</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-purple-400 mr-2 flex-shrink-0"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span>Timeline and budget discussion</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-purple-400 mr-2 flex-shrink-0"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span>Next steps for moving forward</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </motion.div>

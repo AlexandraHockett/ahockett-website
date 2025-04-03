@@ -9,7 +9,7 @@ const testimonials = [
   {
     quote:
       "Alexandra transformed our online presence with an incredibly responsive and captivating website. The animations and interactivity she implemented have given our brand the premium feel we were looking for.",
-    author: "Maria Santos",
+    author: "Anyfa",
     role: "CEO, BadCompany Events",
     avatar: "/images/testimonials/testimonial-1.jpg",
   },

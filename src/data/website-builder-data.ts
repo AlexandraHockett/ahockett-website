@@ -128,7 +128,7 @@ export const templates: Template[] = [
     id: "business",
     name: "Business Pro",
     description: "Professional layout for business websites",
-    image: "/images/templates/business.jpg",
+    image: "/images/logocolor-no-background.svg",
     elements: [
       {
         id: "hero-1",
@@ -160,7 +160,7 @@ export const templates: Template[] = [
     id: "creative",
     name: "Creative Portfolio",
     description: "Bold design for creative professionals",
-    image: "/images/templates/creative.jpg",
+    image: "/images/logocolor-no-background.svg",
     elements: [
       {
         id: "hero-1",
@@ -187,7 +187,7 @@ export const templates: Template[] = [
     id: "minimal",
     name: "Minimal",
     description: "Clean, modern design with minimal elements",
-    image: "/images/templates/minimal.jpg",
+    image: "/images/logocolor-no-background.svg",
     elements: [
       {
         id: "hero-1",
@@ -214,7 +214,7 @@ export const templates: Template[] = [
     id: "ecommerce",
     name: "Online Store",
     description: "Perfect for showcasing products",
-    image: "/images/templates/business.jpg", // Replace with actual e-commerce template
+    image: "/images/logocolor-no-background.svg", // Replace with actual e-commerce template
     elements: [
       {
         id: "hero-1",

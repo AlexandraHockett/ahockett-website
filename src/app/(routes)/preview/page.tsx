@@ -64,10 +64,10 @@ export default function PreviewPage() {
       </header>
 
       {/* Builder */}
-      <main className="container mx-auto px-6 mb-20">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Website Builder</h1>
         <WebsiteBuilder />
-      </main>
-
+      </div>
       {/* CTA */}
       <section className="py-24 bg-gradient-to-b from-indigo-950/30 to-transparent">
         <motion.div

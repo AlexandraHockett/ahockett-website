@@ -23,6 +23,7 @@ interface NavItem {
 // Memoized nav items
 const navItems: NavItem[] = [
   { label: "Home", href: "/" },
+  { label: "Services", href: "/services" }, // Add this line
   { label: "Preview", href: "/preview" },
   { label: "Portfolio", href: "/portfolio" },
   { label: "Process", href: "/process" },

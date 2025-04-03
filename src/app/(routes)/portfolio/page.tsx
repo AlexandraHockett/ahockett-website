@@ -9,6 +9,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import BeforeAfterSlider from "@/components/portfolio/BeforeAfterSlide";
 import ProjectShowcase from "@/components/portfolio/ProjectShowcase";
 import Button from "@/components/ui/Button";
+import PerformanceMetrics from "@/components/portfolio/PerformanceMetrics";
 
 // Register GSAP ScrollTrigger
 if (typeof window !== "undefined") {
@@ -84,6 +85,9 @@ export default function PortfolioPage() {
 
       {/* Main Project Showcase */}
       <ProjectShowcase />
+      
+      {/* Performance Metrics Section */}
+      <PerformanceMetrics />
 
       {/* Before/After Section */}
       <section className="py-24 bg-gradient-to-b from-indigo-950/30 to-black">
