@@ -1,3 +1,4 @@
+// src/components/layout/Footer.tsx
 "use client";
 
 import React, { useEffect, useRef } from "react";
@@ -7,6 +8,7 @@ import { FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Button from "../ui/Button";
+import LocaleSwitcher from "@/components/ui/LocaleSwitcher";
 
 // Register GSAP ScrollTrigger
 if (typeof window !== "undefined") {
@@ -198,6 +200,16 @@ const Footer: React.FC<FooterProps> = ({ className = "" }) => {
                 <span id={`social-${index}`}>{link.icon}</span>
               </motion.a>
             ))}
+          </div>
+        </div>
+
+        {/* Currency Section - Add this new section */}
+        <div className="footer-currency flex justify-center mb-8">
+          <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700/30">
+            <p className="text-sm text-gray-300 mb-2 text-center">
+              Select your preferred currency
+            </p>
+            <LocaleSwitcher />
           </div>
         </div>
 

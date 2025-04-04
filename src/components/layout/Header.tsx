@@ -1,3 +1,4 @@
+// src/components/layout/Header.tsx (partial update to include LocaleSwitcher)
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback, memo } from "react";
@@ -8,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaBars, FaTimes } from "react-icons/fa";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import LocaleSwitcher from "@/components/ui/LocaleSwitcher"; // Import the LocaleSwitcher
 
 // Register GSAP ScrollTrigger
 if (typeof window !== "undefined") {
@@ -23,7 +25,7 @@ interface NavItem {
 // Memoized nav items
 const navItems: NavItem[] = [
   { label: "Home", href: "/" },
-  { label: "Services", href: "/services" }, // Add this line
+  { label: "Services", href: "/services" },
   { label: "Preview", href: "/preview" },
   { label: "Portfolio", href: "/portfolio" },
   { label: "Process", href: "/process" },
@@ -207,7 +209,13 @@ const Header: React.FC<HeaderProps> = memo(({ className }) => {
           </Link>
         </motion.div>
       ))}
-      <div className="ml-8">
+
+      {/* Add the LocaleSwitcher here */}
+      <div className="ml-4">
+        <LocaleSwitcher />
+      </div>
+
+      <div className="ml-4">
         <Link
           href="/quote"
           className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 py-2 rounded-full hover:shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
@@ -329,6 +337,12 @@ const Header: React.FC<HeaderProps> = memo(({ className }) => {
                     {item.label}
                   </Link>
                 ))}
+
+                {/* Add LocaleSwitcher to mobile menu too */}
+                <div className="pt-2 w-full">
+                  <LocaleSwitcher />
+                </div>
+
                 <div className="pt-4 w-full">
                   <Link
                     href="/quote"

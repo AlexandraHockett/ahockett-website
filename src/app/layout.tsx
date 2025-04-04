@@ -1,8 +1,11 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
+import "./styles/animations.css"; // Import the animations CSS
 import { Inter, Poppins } from "next/font/google";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { LocaleProvider } from "@/contexts/LocaleContext";
 
 // Define fonts
 const inter = Inter({
@@ -58,10 +61,12 @@ export default function RootLayout({
       className={`${inter.variable} ${poppins.variable}`}
       suppressHydrationWarning
     >
-      <body>
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+      <body className="flex flex-col min-h-screen">
+        <LocaleProvider>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </LocaleProvider>
       </body>
     </html>
   );
