@@ -1,4 +1,4 @@
-// src/components/layout/Header.tsx (partial update to include LocaleSwitcher)
+// src/components/layout/Header.tsx
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback, memo } from "react";
@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaBars, FaTimes } from "react-icons/fa";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import LocaleSwitcher from "@/components/ui/LocaleSwitcher"; // Import the LocaleSwitcher
+import LocaleSwitcher from "@/components/ui/LocaleSwitcher";
 
 // Register GSAP ScrollTrigger
 if (typeof window !== "undefined") {
@@ -22,15 +22,15 @@ interface NavItem {
   href: string;
 }
 
-// Memoized nav items
+// Memoized nav items with shorter words
 const navItems: NavItem[] = [
-  { label: "Home", href: "/" },
-  { label: "Services", href: "/services" },
-  { label: "Preview", href: "/preview" },
-  { label: "Portfolio", href: "/portfolio" },
-  { label: "Process", href: "/process" },
-  { label: "Quote", href: "/quote" },
-  { label: "Contact", href: "/contact" },
+  { label: "Home", href: "/" }, // Already short
+  { label: "Work", href: "/services" }, // "Services" → "Work"
+  // { label: "Preview", href: "/preview" },
+  { label: "Port", href: "/portfolio" }, // "Portfolio" → "Port"
+  { label: "Flow", href: "/process" }, // "Process" → "Flow"
+  { label: "Rate", href: "/quote" }, // "Quote" → "Rate"
+  { label: "Chat", href: "/contact" }, // "Contact" → "Chat"
 ];
 
 interface HeaderProps {
@@ -192,12 +192,13 @@ const Header: React.FC<HeaderProps> = memo(({ className }) => {
 
   // Memoized NavLinks with Framer Motion hover effects
   const NavLinks = memo(() => (
-    <div className="hidden md:flex items-center space-x-1">
+    <div className="hidden md:flex items-center space-x-1 md:space-x-2 lg:space-x-3 xl:space-x-4">
       {navItems.map((item) => (
         <motion.div
           key={item.label}
           whileHover={{ scale: 1.05, rotateX: 5 }}
           transition={{ type: "spring", stiffness: 300 }}
+          className="text-xs md:text-sm lg:text-base xl:text-lg"
         >
           <Link
             href={item.href}
@@ -210,17 +211,16 @@ const Header: React.FC<HeaderProps> = memo(({ className }) => {
         </motion.div>
       ))}
 
-      {/* Add the LocaleSwitcher here */}
-      <div className="ml-4">
+      <div className="ml-1 md:ml-2 lg:ml-3 xl:ml-4">
         <LocaleSwitcher />
       </div>
 
-      <div className="ml-4">
+      <div className="ml-1 md:ml-2 lg:ml-3 xl:ml-4">
         <Link
           href="/quote"
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 py-2 rounded-full hover:shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 md:px-3 md:py-1 lg:px-4 lg:py-2 xl:px-5 xl:py-2 rounded-full text-xs md:text-sm lg:text-base xl:text-lg hover:shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
         >
-          Get a Quote
+          Rate
         </Link>
       </div>
     </div>
@@ -231,13 +231,13 @@ const Header: React.FC<HeaderProps> = memo(({ className }) => {
     <>
       <div
         ref={navContainerRef}
-        className={`fixed inset-x-0 mx-auto top-4 z-50 h-16 max-w-[96%] bg-gradient-to-r from-indigo-950/90 to-purple-900/90 backdrop-blur-md border border-indigo-800/30 rounded-2xl shadow-lg transition-colors duration-300 ${className || ""} ${
+        className={`fixed inset-x-0 mx-auto top-2 sm:top-3 md:top-4 z-50 h-12 sm:h-14 md:h-16 max-w-[80%] sm:max-w-[85%] md:max-w-[90%] lg:max-w-[92%] xl:max-w-[95%] bg-gradient-to-r from-indigo-950/90 to-purple-900/90 backdrop-blur-md border border-indigo-800/30 rounded-xl sm:rounded-2xl shadow-lg transition-colors duration-300 ${className || ""} ${
           scrollProgress > 10 ? "floating-nav" : ""
         }`}
       >
         <header className="absolute top-1/2 w-full -translate-y-1/2">
           <nav
-            className="container mx-auto flex items-center justify-between px-4 py-2"
+            className="container mx-auto flex items-center justify-between px-1 sm:px-2 md:px-4 lg:px-6 py-1 sm:py-2 md:py-2"
             role="navigation"
           >
             <Link href="/" className="z-10 header-logo">
@@ -245,10 +245,10 @@ const Header: React.FC<HeaderProps> = memo(({ className }) => {
                 <Image
                   src="/images/logoblack-no-background.svg"
                   alt="AHockett"
-                  width={120}
-                  height={40}
+                  width={60} // Even smaller
+                  height={24} // Even smaller
+                  className="h-6 sm:h-7 md:h-8 lg:h-10 invert"
                   priority
-                  className="h-30 w-auto invert"
                   onError={(e) => {
                     e.currentTarget.src = "/images/fallback-logo.png";
                   }}
@@ -261,7 +261,7 @@ const Header: React.FC<HeaderProps> = memo(({ className }) => {
             <div className="relative block md:hidden z-50">
               <button
                 onClick={toggleMenu}
-                className="text-xl text-gray-200 transition-transform duration-200 hover:scale-110 active:scale-95"
+                className="text-lg sm:text-xl md:text-2xl p-1 sm:p-2 transition-transform duration-200 hover:scale-110 active:scale-95"
                 aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={isMenuOpen}
               >
@@ -293,10 +293,10 @@ const Header: React.FC<HeaderProps> = memo(({ className }) => {
           </nav>
         </header>
         <div
-          className="progress-bar absolute bottom-0 left-0 h-1 bg-gradient-to-r from-purple-500/80 via-fuchsia-500/80 to-pink-500/80 rounded-bl-2xl transition-all duration-100 ease-out"
+          className="progress-bar absolute bottom-0 left-0 h-0.5 sm:h-1 bg-gradient-to-r from-purple-500/80 via-fuchsia-500/80 to-pink-500/80 rounded-bl sm:rounded-bl-2xl transition-all duration-100 ease-out"
           style={{
             width: `${scrollProgress}%`,
-            borderBottomRightRadius: scrollProgress < 98 ? "0" : "0.5rem",
+            borderBottomRightRadius: scrollProgress < 98 ? "0" : "0.25rem",
           }}
         />
       </div>
@@ -312,14 +312,14 @@ const Header: React.FC<HeaderProps> = memo(({ className }) => {
             />
             <div
               ref={mobileNavRef}
-              className="fixed top-20 inset-y-0 right-4 w-64 z-40 bg-gradient-to-b from-indigo-950/95 to-purple-900/95 backdrop-blur-md rounded-2xl md:hidden overflow-hidden"
+              className="fixed top-12 sm:top-14 md:top-16 inset-y-0 right-1 sm:right-2 md:right-4 w-48 sm:w-56 md:w-64 lg:w-72 z-40 bg-gradient-to-b from-indigo-950/95 to-purple-900/95 backdrop-blur-md rounded-xl sm:rounded-2xl md:rounded-2xl overflow-y-auto"
             >
-              <nav className="p-6 flex flex-col items-start w-full space-y-6">
+              <nav className="p-3 sm:p-4 md:p-6 flex flex-col items-start w-full space-y-3 sm:space-y-4 md:space-y-6">
                 {navItems.map((item, index) => (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={`nav-hover-btn ml-0 ${
+                    className={`nav-hover-btn ml-0 text-xs sm:text-sm md:text-base ${
                       activePage === item.href
                         ? "text-purple-300"
                         : "text-blue-50"
@@ -338,18 +338,17 @@ const Header: React.FC<HeaderProps> = memo(({ className }) => {
                   </Link>
                 ))}
 
-                {/* Add LocaleSwitcher to mobile menu too */}
-                <div className="pt-2 w-full">
+                <div className="pt-2 sm:pt-3 md:pt-4 w-full">
                   <LocaleSwitcher />
                 </div>
 
-                <div className="pt-4 w-full">
+                <div className="pt-2 sm:pt-3 md:pt-4 w-full">
                   <Link
                     href="/quote"
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 py-2 rounded-full block text-center hover:shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 sm:px-3 md:px-4 py-1 sm:py-1 md:py-2 rounded-full block text-center text-xs sm:text-sm md:text-base hover:shadow-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Get a Quote
+                    Rate
                   </Link>
                 </div>
               </nav>

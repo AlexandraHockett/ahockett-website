@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import type { WebpackConfigContext } from "next/dist/server/config-shared";
 
 const nextConfig: NextConfig = {
   // Performance optimizations
@@ -46,21 +45,6 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Webpack configuration
-  webpack: (config: any, { isServer }: WebpackConfigContext) => {
-    // Optimize bundle
-    config.optimization.minimize = true;
-
-    // Performance hints
-    config.performance = {
-      hints: "warning",
-      maxEntrypointSize: 512000,
-      maxAssetSize: 512000,
-    };
-
-    return config;
-  },
-
   // Redirects for SEO
   async redirects() {
     return [
@@ -77,12 +61,8 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Experimental features
-  experimental: {
-    optimizePackageImports: ["@/components", "@/utils"],
-    serverComponentsExternalPackages: ["sharp", "canvas"],
-    nextScriptWorkers: true,
-  },
+  // External packages
+  serverExternalPackages: ["sharp", "canvas"],
 };
 
 export default nextConfig;
