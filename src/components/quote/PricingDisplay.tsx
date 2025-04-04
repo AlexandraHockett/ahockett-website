@@ -7,26 +7,20 @@ import gsap from "gsap";
 import { useLocale } from "@/contexts/LocaleContext";
 import { getPricingInLocale, formatPrice } from "@/utils/pricing";
 
-interface MetricProps {
-  name: string;
-  score: number;
-  description: string;
-  color: string;
-}
-
 export default function PricingDisplay() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { locale } = useLocale();
 
   // Get pricing in the current locale
-  const { tiers } = getPricingInLocale(locale);
+  const { tiers, addons } = getPricingInLocale(locale);
 
-  // Use the formatted prices with proper currency
-  const metrics: MetricProps[] = tiers.map((tier) => ({
+  // Transform tiers into metric-like objects for rendering
+  const metrics = tiers.map((tier) => ({
     name: tier.name,
-    score: tier.price,
+    score: tier.basePrice,
     description: tier.features.join(", "),
     color: tier.recommended ? "#8b5cf6" : "#10b981",
+    recommended: tier.recommended,
   }));
 
   useEffect(() => {
@@ -69,7 +63,7 @@ export default function PricingDisplay() {
         },
       }
     );
-  }, []);
+  }, [locale]); // Re-run animations when locale changes
 
   return (
     <div ref={containerRef} className="space-y-8">
@@ -138,7 +132,7 @@ export default function PricingDisplay() {
 
                 <div>
                   <h3 className="text-xl font-semibold text-white mb-1">
-                    {service.name}
+                    {service.name} {service.recommended && "(Recommended)"}
                   </h3>
                   <p className="text-gray-400 text-sm mb-3">
                     {service.description.substring(0, 120)}...
@@ -178,7 +172,7 @@ export default function PricingDisplay() {
 
               {service.color === "#8b5cf6" && (
                 <div className="absolute -top-3 right-4 px-3 py-1 bg-purple-600 text-white text-xs font-medium rounded-full">
-                  Popular Choice
+                  Most Popular
                 </div>
               )}
             </motion.div>
@@ -201,29 +195,7 @@ export default function PricingDisplay() {
         </p>
 
         <div className="grid md:grid-cols-3 gap-4">
-          {[
-            {
-              id: "maintenance",
-              title: "Website Maintenance",
-              description:
-                "Keep your website secure, up-to-date, and performing optimally.",
-              price: formatPrice(150, locale) + "/month",
-            },
-            {
-              id: "seo",
-              title: "Advanced SEO",
-              description:
-                "Improve your search engine rankings with comprehensive optimization.",
-              price: "From " + formatPrice(1200, locale),
-            },
-            {
-              id: "content",
-              title: "Content Creation",
-              description:
-                "Professional copywriting and media creation for your website.",
-              price: "Custom quote",
-            },
-          ].map((service, index) => (
+          {addons.map((service, index) => (
             <motion.div
               key={service.id}
               className="additional-card bg-gray-800/50 border border-gray-700/50 rounded-lg p-5 hover:border-purple-500/30 transition-all duration-300"
@@ -234,12 +206,15 @@ export default function PricingDisplay() {
               }}
             >
               <h3 className="text-lg font-semibold text-white mb-2">
-                {service.title}
+                {service.name}
               </h3>
               <p className="text-gray-400 text-sm mb-3">
                 {service.description}
               </p>
-              <div className="text-purple-300 font-medium">{service.price}</div>
+              <div className="text-purple-300 font-medium">
+                {formatPrice(service.basePrice, locale)}
+                {service.id === "maintenance" && "/month"}
+              </div>
             </motion.div>
           ))}
         </div>

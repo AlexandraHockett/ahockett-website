@@ -1,9 +1,17 @@
 // src/utils/pricing.ts
 import { Locale, formatCurrency, convertCurrency } from "./currency-utils";
 
+// Purchasing Power Parity (PPP) adjustment factors
+// These are rough estimates and should be periodically updated
+const PPP_FACTORS: Record<Locale, number> = {
+  "pt-PT": 1.0, // Base reference (Portugal)
+  "en-GB": 1.2, // UK typically has higher living costs
+  "en-US": 1.4, // US often has higher service prices
+};
+
 export interface PricingTier {
   name: string;
-  price: number;
+  basePrice: number;
   features: string[];
   recommended?: boolean;
 }
@@ -11,15 +19,15 @@ export interface PricingTier {
 export interface AddonOption {
   id: string;
   name: string;
-  price: number;
+  basePrice: number;
   description: string;
 }
 
-// Base prices in EUR (Portuguese)
+// Base prices always in EUR (Portuguese reference point)
 export const websiteTiers: PricingTier[] = [
   {
     name: "Basic",
-    price: 2000, // EUR
+    basePrice: 2000, // EUR base price
     features: [
       "5-page responsive website",
       "Mobile-friendly design",
@@ -30,7 +38,7 @@ export const websiteTiers: PricingTier[] = [
   },
   {
     name: "Premium",
-    price: 5000, // EUR
+    basePrice: 5000, // EUR base price
     features: [
       "8-10 page responsive website",
       "Custom animations (GSAP/Framer Motion)",
@@ -43,7 +51,7 @@ export const websiteTiers: PricingTier[] = [
   },
   {
     name: "Enterprise",
-    price: 8000, // EUR
+    basePrice: 8000, // EUR base price
     features: [
       "Custom website architecture",
       "Advanced animations & interactions",
@@ -60,50 +68,57 @@ export const addonOptions: AddonOption[] = [
   {
     id: "maintenance",
     name: "Website Maintenance",
-    price: 150, // EUR per month
+    basePrice: 150, // EUR per month
     description: "Monthly updates, security, and technical support",
   },
   {
     id: "seo",
     name: "Advanced SEO Package",
-    price: 1200, // EUR
+    basePrice: 1200, // EUR
     description: "Keyword research, optimization, and monitoring",
   },
   {
     id: "content",
     name: "Content Creation",
-    price: 800, // EUR
+    basePrice: 800, // EUR
     description: "Professional copywriting and media creation",
   },
   {
     id: "hosting",
     name: "Premium Hosting",
-    price: 250, // EUR per year
+    basePrice: 250, // EUR per year
     description: "High-performance, secure hosting for 1 year",
   },
 ];
 
-// Get pricing in the user's locale
+// Adjust price based on locale's purchasing power
+export const adjustPriceForLocale = (
+  basePrice: number,
+  locale: Locale = "pt-PT"
+): number => {
+  // Get the PPP factor for the locale (default to Portuguese if not found)
+  const pppFactor = PPP_FACTORS[locale] || 1.0;
+
+  // Adjust the base price
+  return Math.round(basePrice * pppFactor);
+};
+
+// Get pricing in the user's locale with PPP adjustment
 export const getPricingInLocale = (
   locale: Locale = "pt-PT"
 ): { tiers: PricingTier[]; addons: AddonOption[] } => {
-  // If it's already EUR, no conversion needed
-  if (locale === "pt-PT") {
-    return { tiers: websiteTiers, addons: addonOptions };
-  }
-
-  // Convert prices to the target locale
-  const convertedTiers = websiteTiers.map((tier) => ({
+  // Adjust prices for the specific locale
+  const adjustedTiers = websiteTiers.map((tier) => ({
     ...tier,
-    price: convertCurrency(tier.price, "pt-PT", locale),
+    basePrice: adjustPriceForLocale(tier.basePrice, locale),
   }));
 
-  const convertedAddons = addonOptions.map((addon) => ({
+  const adjustedAddons = addonOptions.map((addon) => ({
     ...addon,
-    price: convertCurrency(addon.price, "pt-PT", locale),
+    basePrice: adjustPriceForLocale(addon.basePrice, locale),
   }));
 
-  return { tiers: convertedTiers, addons: convertedAddons };
+  return { tiers: adjustedTiers, addons: adjustedAddons };
 };
 
 // Calculate total based on selections
@@ -111,8 +126,8 @@ export const calculateQuote = (
   tier: PricingTier,
   addons: AddonOption[]
 ): number => {
-  const basePrice = tier.price;
-  const addonTotal = addons.reduce((sum, addon) => sum + addon.price, 0);
+  const basePrice = tier.basePrice;
+  const addonTotal = addons.reduce((sum, addon) => sum + addon.basePrice, 0);
   return basePrice + addonTotal;
 };
 
@@ -121,7 +136,9 @@ export const formatPrice = (
   price: number,
   locale: Locale = "pt-PT"
 ): string => {
-  return formatCurrency(price, locale);
+  // First adjust price for locale, then format
+  const adjustedPrice = adjustPriceForLocale(price, locale);
+  return formatCurrency(adjustedPrice, locale);
 };
 
 // Estimates based on features
@@ -132,7 +149,7 @@ export const estimateByFeatures = (
   hasCms: boolean,
   locale: Locale = "pt-PT"
 ): string => {
-  let estimate = 1000; // Base price in EUR
+  let estimate = 1000; // Base price
 
   // Add based on page count
   if (pageCount <= 5) {
@@ -148,10 +165,8 @@ export const estimateByFeatures = (
   if (hasEcommerce) estimate += 2000;
   if (hasCms) estimate += 1000;
 
-  // Convert if needed and format
-  if (locale !== "pt-PT") {
-    estimate = convertCurrency(estimate, "pt-PT", locale);
-  }
+  // Adjust for locale's purchasing power
+  estimate = adjustPriceForLocale(estimate, locale);
 
   return formatCurrency(estimate, locale);
 };

@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Alexandra Hockett - Web Development Portfolio
 
-## Getting Started
+## 🚀 Cutting-Edge Web Development Services
 
-First, run the development server:
+Welcome to my professional web development portfolio. I specialize in creating stunning, high-performance websites and web applications that transform digital experiences.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 🛠 Tech Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Next.js
+- React
+- TypeScript
+- GSAP
+- Framer Motion
+- Tailwind CSS
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🌟 Services
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Custom Website Development
+- Web Application Design
+- E-commerce Solutions
+- Performance Optimization
+- Responsive Design
+- Interactive UI/UX
 
-## Learn More
+### 🔥 Key Differentiators
 
-To learn more about Next.js, take a look at the following resources:
+- Pixel-perfect design
+- Cinematic animations
+- Performance-first approach
+- SEO-optimized websites
+- Cutting-edge technology
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 📞 Let's Connect
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Website: [ahockett.com](https://ahockett.com)
+- Email: hello@ahockett.com
+- LinkedIn: [Alexandra Hockett](https://linkedin.com/in/alexandrahockett)
 
-## Deploy on Vercel
+## 💡 Why Choose Me?
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Custom solutions tailored to your business
+- Modern, responsive design
+- Advanced animation techniques
+- Comprehensive web development expertise
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🏆 Portfolio Highlights
+
+Check out my [portfolio page](https://ahockett.com/portfolio) to see recent projects and transformative web solutions.
+
+---
+
+_Turning digital visions into extraordinary web experiences_
