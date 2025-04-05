@@ -168,14 +168,24 @@ export default function EnhancedContactForm() {
     setIsSubmitting(true);
 
     try {
-      // In a real implementation, you would send this to your backend or a service like Formspree
-      // You can replace this with your actual submission logic
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate API call
-      setIsSubmitted(true);
+      // Enviar para a nossa API route
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setIsSubmitted(true); // Corrigido de setSubmitted para setIsSubmitted
+      } else {
+        throw new Error(data.error || "Falha no envio do formulário");
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
       setErrors({
-        form: "There was an error submitting your message. Please try again.",
+        form: "Ocorreu um erro ao enviar a mensagem. Por favor tente novamente.",
       });
     } finally {
       setIsSubmitting(false);

@@ -7,6 +7,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import EnhancedContactForm from "@/components/contact/EnhancedContactForm";
 import Button from "@/components/ui/Button";
+import CalendlyIntegration from "@/components/contact/CalendlyIntegration";
 
 // Register GSAP ScrollTrigger
 if (typeof window !== "undefined") {
@@ -77,7 +78,7 @@ export default function ContactPage() {
               </h2>
 
               <div className="space-y-6">
-                {/* Existing contact info cards */}
+                {/* Updated Phone Info */}
                 <div className="flex items-start space-x-4">
                   <div className="bg-purple-500/20 p-3 rounded-lg text-purple-300">
                     <svg
@@ -96,13 +97,15 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-medium text-white">Phone</h3>
-                    <p className="text-gray-300 mt-1">+1 (555) 123-4567</p>
+                    <p className="text-gray-300 mt-1">+351 912 345 678</p>{" "}
+                    {/* Example Portuguese number */}
                     <p className="text-gray-400 text-sm mt-1">
-                      Available Monday-Friday, 9am-5pm EST
+                      Available Monday-Friday, 9am-5pm WEST/GMT+1
                     </p>
                   </div>
                 </div>
 
+                {/* Email - No Change */}
                 <div className="flex items-start space-x-4">
                   <div className="bg-indigo-500/20 p-3 rounded-lg text-indigo-300">
                     <svg
@@ -122,13 +125,14 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-medium text-white">Email</h3>
-                    <p className="text-gray-300 mt-1">hello@ahockett.com</p>
+                    <p className="text-gray-300 mt-1">contact@ahockett.com</p>
                     <p className="text-gray-400 text-sm mt-1">
                       I'll respond within 24-48 hours
                     </p>
                   </div>
                 </div>
 
+                {/* Location - No Change */}
                 <div className="flex items-start space-x-4">
                   <div className="bg-pink-500/20 p-3 rounded-lg text-pink-300">
                     <svg
@@ -389,7 +393,7 @@ export default function ContactPage() {
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                   </svg>
                   <h4 className="text-xl font-bold text-white mb-3">
-                    Calendly Integration
+                    <CalendlyIntegration url="https://calendly.com/teu-username/30min" />
                   </h4>
                   <p className="text-gray-300 mb-6">
                     In a production environment, this would be replaced with an

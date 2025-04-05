@@ -24,11 +24,11 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   metadataBase: new URL("https://ahockett.com"),
   title: {
-    default: "Alexandra Hockett | Web Development Expert | Stunning Websites",
-    template: "%s | Alexandra Hockett Web Development",
+    default: "Alexandra Hockett | Web Development Expert",
+    template: "%s | Alexandra Hockett",
   },
   description:
-    "Transforming businesses with cutting-edge web development. Custom websites, web applications, and digital solutions that captivate and convert. Next.js, React, GSAP expert.",
+    "Expert web development with Next.js, React, and GSAP. Custom websites and digital solutions that captivate and convert.",
   applicationName: "Alexandra Hockett Web Development",
   authors: [{ name: "Alexandra Hockett", url: "https://ahockett.com" }],
   generator: "Next.js",
@@ -43,8 +43,6 @@ export const metadata: Metadata = {
     "responsive web design",
     "digital solutions",
     "e-commerce websites",
-    "portfolio website",
-    "web design services",
   ],
   openGraph: {
     type: "website",
@@ -82,7 +80,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "your-google-site-verification-code", // Replace with actual verification
+    google: "YOUR_ACTUAL_GOOGLE_VERIFICATION_CODE", // Replace with your code
   },
   alternates: {
     canonical: "https://ahockett.com",
@@ -92,7 +90,6 @@ export const metadata: Metadata = {
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-  category: "Web Development Services",
 };
 
 export default function RootLayout({

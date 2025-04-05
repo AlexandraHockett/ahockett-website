@@ -7,6 +7,7 @@ import { motion, useAnimation, useInView } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Button from "@/components/ui/Button";
+import { div, section } from "framer-motion/client";
 
 // Register GSAP ScrollTrigger
 if (typeof window !== "undefined") {
@@ -95,16 +96,15 @@ const ProjectShowcase: React.FC = () => {
             }}
             className="order-2 lg:order-1"
           >
-            <div className="relative aspect-video rounded-xl overflow-hidden shadow-[0_0_30px_rgba(147,51,234,0.3)] border border-purple-500/30 group">
-              <Image
-                src="/images/portfolio/badcompany.jpg"
-                alt="BadCompany Website"
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-700"
-              />
-
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-300"></div>
-
+           <div className="relative h-[450px] w-full rounded-xl overflow-hidden shadow-2xl border border-purple-500/30">
+  <Image
+    src="https://placehold.co/1200x700/9333ea/FFFFFF?text=BadCompany+Website"
+    alt="BadCompany Website"
+    fill
+    className="object-cover"
+  />
+  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+</div>
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <div className="flex flex-wrap gap-2 mb-4">
                   {projectData.tags.map((tag, index) => (

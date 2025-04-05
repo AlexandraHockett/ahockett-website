@@ -1,9 +1,12 @@
+// src/components/quote/QuoteForm.tsx
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import Button from "@/components/ui/Button";
+import { useLocale } from "@/contexts/LocaleContext";
+import { formatPrice } from "@/utils/pricing";
 
 // Form steps interface
 interface FormStep {
@@ -23,182 +26,217 @@ interface FormField {
   helpText?: string;
 }
 
-// Form steps data
-const formSteps: FormStep[] = [
-  {
-    id: 1,
-    title: "About Your Business",
-    fields: [
-      {
-        id: "businessName",
-        label: "Business Name",
-        type: "text",
-        placeholder: "e.g., Your Company Name",
-        required: true,
-      },
-      {
-        id: "industry",
-        label: "Industry",
-        type: "select",
-        options: [
-          { value: "", label: "Select your industry" },
-          { value: "ecommerce", label: "E-commerce" },
-          { value: "business", label: "Business / Corporate" },
-          { value: "portfolio", label: "Portfolio / Creative" },
-          { value: "blog", label: "Blog / Publishing" },
-          { value: "education", label: "Education" },
-          { value: "events", label: "Events" },
-          { value: "other", label: "Other" },
-        ],
-        required: true,
-      },
-      {
-        id: "businessDescription",
-        label: "Brief Description of Your Business",
-        type: "textarea",
-        placeholder:
-          "Tell me a bit about your business and your target audience...",
-        required: true,
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "Website Details",
-    fields: [
-      {
-        id: "websiteType",
-        label: "Website Type",
-        type: "radio",
-        options: [
-          { value: "new", label: "New Website" },
-          { value: "redesign", label: "Redesign Existing Website" },
-        ],
-        required: true,
-      },
-      {
-        id: "existingUrl",
-        label: "Existing Website URL (if redesign)",
-        type: "text",
-        placeholder: "https://",
-      },
-      {
-        id: "pages",
-        label: "Estimated Number of Pages",
-        type: "select",
-        options: [
-          { value: "", label: "Select number of pages" },
-          { value: "1-5", label: "1-5 pages" },
-          { value: "6-10", label: "6-10 pages" },
-          { value: "11-20", label: "11-20 pages" },
-          { value: "20+", label: "20+ pages" },
-        ],
-        required: true,
-      },
-      {
-        id: "features",
-        label: "Key Features Needed",
-        type: "checkbox",
-        options: [
-          { value: "responsive", label: "Responsive Design" },
-          { value: "animations", label: "Custom Animations" },
-          { value: "cms", label: "Content Management System" },
-          { value: "ecommerce", label: "E-commerce Functionality" },
-          { value: "blog", label: "Blog" },
-          { value: "forms", label: "Contact/Lead Forms" },
-          { value: "seo", label: "SEO Optimization" },
-          { value: "social", label: "Social Media Integration" },
-        ],
-      },
-    ],
-  },
-  {
-    id: 3,
-    title: "Budget & Timeline",
-    fields: [
-      {
-        id: "budget",
-        label: "Budget Range",
-        type: "select",
-        options: [
-          { value: "", label: "Select your budget range" },
-          { value: "1000-3000", label: "$1,000 - $3,000" },
-          { value: "3000-5000", label: "$3,000 - $5,000" },
-          { value: "5000-10000", label: "$5,000 - $10,000" },
-          { value: "10000+", label: "$10,000+" },
-          { value: "unsure", label: "Not sure yet" },
-        ],
-        required: true,
-        helpText: "This helps me tailor solutions that fit within your budget.",
-      },
-      {
-        id: "timeline",
-        label: "Desired Timeline",
-        type: "select",
-        options: [
-          { value: "", label: "Select your timeline" },
-          { value: "1month", label: "Less than 1 month" },
-          { value: "1-2months", label: "1-2 months" },
-          { value: "2-3months", label: "2-3 months" },
-          { value: "3months+", label: "3+ months" },
-          { value: "flexible", label: "Flexible" },
-        ],
-        required: true,
-      },
-      {
-        id: "additionalInfo",
-        label: "Additional Information",
-        type: "textarea",
-        placeholder: "Anything else you'd like me to know about your project?",
-      },
-    ],
-  },
-  {
-    id: 4,
-    title: "Contact Information",
-    fields: [
-      {
-        id: "name",
-        label: "Your Name",
-        type: "text",
-        placeholder: "Full Name",
-        required: true,
-      },
-      {
-        id: "email",
-        label: "Email Address",
-        type: "email",
-        placeholder: "email@example.com",
-        required: true,
-      },
-      {
-        id: "phone",
-        label: "Phone Number",
-        type: "tel",
-        placeholder: "+1 (123) 456-7890",
-      },
-      {
-        id: "preferredContact",
-        label: "Preferred Contact Method",
-        type: "radio",
-        options: [
-          { value: "email", label: "Email" },
-          { value: "phone", label: "Phone" },
-        ],
-        required: true,
-      },
-    ],
-  },
-];
-
 export default function QuoteForm() {
+  // Obter o locale atual do contexto
+  const { locale } = useLocale();
+
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<Record<string, any>>({
+    // Inicializa todos os campos possíveis com valores vazios
+    businessName: "",
+    industry: "",
+    businessDescription: "",
+    websiteType: "",
+    existingUrl: "",
+    pages: "",
+    features: [],
+    budget: "",
+    timeline: "",
+    additionalInfo: "",
+    name: "",
+    email: "",
+    phone: "",
+    preferredContact: "",
+  });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [formSteps, setFormSteps] = useState<FormStep[]>([]);
 
   const formRef = useRef<HTMLFormElement>(null);
   const stepsRef = useRef<HTMLDivElement>(null);
+
+  // Efeito para atualizar as opções de orçamento com base na moeda selecionada
+  useEffect(() => {
+    // Define os passos do formulário com base no locale atual
+    setFormSteps([
+      {
+        id: 1,
+        title: "About Your Business",
+        fields: [
+          {
+            id: "businessName",
+            label: "Business Name",
+            type: "text",
+            placeholder: "e.g., Your Company Name",
+            required: true,
+          },
+          {
+            id: "industry",
+            label: "Industry",
+            type: "select",
+            options: [
+              { value: "", label: "Select your industry" },
+              { value: "ecommerce", label: "E-commerce" },
+              { value: "business", label: "Business / Corporate" },
+              { value: "portfolio", label: "Portfolio / Creative" },
+              { value: "blog", label: "Blog / Publishing" },
+              { value: "education", label: "Education" },
+              { value: "events", label: "Events" },
+              { value: "other", label: "Other" },
+            ],
+            required: true,
+          },
+          {
+            id: "businessDescription",
+            label: "Brief Description of Your Business",
+            type: "textarea",
+            placeholder:
+              "Tell me a bit about your business and your target audience...",
+            required: true,
+          },
+        ],
+      },
+      {
+        id: 2,
+        title: "Website Details",
+        fields: [
+          {
+            id: "websiteType",
+            label: "Website Type",
+            type: "radio",
+            options: [
+              { value: "new", label: "New Website" },
+              { value: "redesign", label: "Redesign Existing Website" },
+            ],
+            required: true,
+          },
+          {
+            id: "existingUrl",
+            label: "Existing Website URL (if redesign)",
+            type: "text",
+            placeholder: "https://",
+          },
+          {
+            id: "pages",
+            label: "Estimated Number of Pages",
+            type: "select",
+            options: [
+              { value: "", label: "Select number of pages" },
+              { value: "1-5", label: "1-5 pages" },
+              { value: "6-10", label: "6-10 pages" },
+              { value: "11-20", label: "11-20 pages" },
+              { value: "20+", label: "20+ pages" },
+            ],
+            required: true,
+          },
+          {
+            id: "features",
+            label: "Key Features Needed",
+            type: "checkbox",
+            options: [
+              { value: "responsive", label: "Responsive Design" },
+              { value: "animations", label: "Custom Animations" },
+              { value: "cms", label: "Content Management System" },
+              { value: "ecommerce", label: "E-commerce Functionality" },
+              { value: "blog", label: "Blog" },
+              { value: "forms", label: "Contact/Lead Forms" },
+              { value: "seo", label: "SEO Optimization" },
+              { value: "social", label: "Social Media Integration" },
+            ],
+          },
+        ],
+      },
+      {
+        id: 3,
+        title: "Budget & Timeline",
+        fields: [
+          {
+            id: "budget",
+            label: "Budget Range",
+            type: "select",
+            options: [
+              { value: "", label: "Select your budget range" },
+              {
+                value: "1000-3000",
+                label: `${formatPrice(1000, locale)} - ${formatPrice(3000, locale)}`,
+              },
+              {
+                value: "3000-5000",
+                label: `${formatPrice(3000, locale)} - ${formatPrice(5000, locale)}`,
+              },
+              {
+                value: "5000-10000",
+                label: `${formatPrice(5000, locale)} - ${formatPrice(10000, locale)}`,
+              },
+              { value: "10000+", label: `${formatPrice(10000, locale)}+` },
+              { value: "unsure", label: "Not sure yet" },
+            ],
+            required: true,
+            helpText:
+              "This helps me tailor solutions that fit within your budget.",
+          },
+          {
+            id: "timeline",
+            label: "Desired Timeline",
+            type: "select",
+            options: [
+              { value: "", label: "Select your timeline" },
+              { value: "1month", label: "Less than 1 month" },
+              { value: "1-2months", label: "1-2 months" },
+              { value: "2-3months", label: "2-3 months" },
+              { value: "3months+", label: "3+ months" },
+              { value: "flexible", label: "Flexible" },
+            ],
+            required: true,
+          },
+          {
+            id: "additionalInfo",
+            label: "Additional Information",
+            type: "textarea",
+            placeholder:
+              "Anything else you'd like me to know about your project?",
+          },
+        ],
+      },
+      {
+        id: 4,
+        title: "Contact Information",
+        fields: [
+          {
+            id: "name",
+            label: "Your Name",
+            type: "text",
+            placeholder: "Full Name",
+            required: true,
+          },
+          {
+            id: "email",
+            label: "Email Address",
+            type: "email",
+            placeholder: "email@example.com",
+            required: true,
+          },
+          {
+            id: "phone",
+            label: "Phone Number",
+            type: "tel",
+            placeholder: "+1 (123) 456-7890",
+          },
+          {
+            id: "preferredContact",
+            label: "Preferred Contact Method",
+            type: "radio",
+            options: [
+              { value: "email", label: "Email" },
+              { value: "phone", label: "Phone" },
+            ],
+            required: true,
+          },
+        ],
+      },
+    ]);
+  }, [locale]);
 
   // Handle form input changes
   const handleChange = (
@@ -206,10 +244,9 @@ export default function QuoteForm() {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
-    const { id, value, type } = e.target;
+    const { id, value, type, checked } = e.target as any;
 
     if (type === "checkbox") {
-      const checked = (e.target as HTMLInputElement).checked;
       setFormData((prev) => ({
         ...prev,
         [id]: checked
@@ -224,25 +261,46 @@ export default function QuoteForm() {
     }
   };
 
-  // Handle form submission
+  // Handle form submission - Versão melhorada com logs detalhados
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // In a real application, you would send this data to your backend or a service like Formspree
-      // await fetch('/api/submit-quote', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData),
-      // });
+      console.log("Enviando dados:", formData);
 
-      // Simulate API call with timeout
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Adicionar informação da moeda/locale escolhido
+      const dataToSend = {
+        ...formData,
+        locale,
+        currency:
+          locale === "pt-PT" ? "EUR" : locale === "en-GB" ? "GBP" : "USD",
+      };
 
-      setSubmitted(true);
+      // Enviar para a nossa API route de cotação
+      const response = await fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSend),
+      });
+
+      const data = await response.json();
+      console.log("Resposta do servidor:", data);
+
+      if (response.ok && data.success) {
+        setSubmitted(true);
+      } else {
+        // Mostra o erro mais descritivo possível
+        const errorMessage =
+          data.error || data.details || "Falha no envio do pedido de cotação";
+        throw new Error(errorMessage);
+      }
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Erro ao submeter formulário:", error);
+      // Mostrar o erro no UI em vez de apenas no console
+      alert(
+        `Erro ao enviar o pedido: ${error instanceof Error ? error.message : "Erro desconhecido"}`
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -287,7 +345,7 @@ export default function QuoteForm() {
         ease: "power2.out",
       });
     }
-  }, [currentStep]);
+  }, [currentStep, formSteps.length]);
 
   // Animate fields when step changes
   useEffect(() => {
@@ -307,6 +365,37 @@ export default function QuoteForm() {
       );
     }
   }, [currentStep]);
+
+  // Se os passos do formulário ainda não estiverem carregados, mostrar um estado de carregamento
+  if (formSteps.length === 0) {
+    return (
+      <div className="bg-gradient-to-br from-gray-900/80 to-black/80 backdrop-blur-md rounded-xl p-8 border border-purple-500/30 shadow-xl flex justify-center items-center min-h-[300px]">
+        <div className="text-white text-center">
+          <svg
+            className="animate-spin h-8 w-8 mx-auto mb-4 text-purple-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <p>Loading form...</p>
+        </div>
+      </div>
+    );
+  }
 
   // If form is submitted, show success message
   if (submitted) {
@@ -509,7 +598,11 @@ export default function QuoteForm() {
                           id={field.id}
                           name={field.id}
                           value={option.value}
-                          checked={formData[field.id]?.includes(option.value)}
+                          checked={
+                            Array.isArray(formData[field.id])
+                              ? formData[field.id].includes(option.value)
+                              : false
+                          } // Garante que é sempre um booleano
                           onChange={handleChange}
                           className="w-5 h-5 text-purple-600 bg-gray-800 border-gray-700 rounded focus:ring-purple-500/50"
                         />
